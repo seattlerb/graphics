@@ -39,7 +39,7 @@ if [ -f $0 ]; then
     rake clean package
     $SUDO gem install pkg/graphics*.gem
 else
-    $SUDO gem install graphics --pre
+    $SUDO gem install graphics
 fi
 
 ruby -Ilib -rgraphics -e 'Class.new(Graphics::Simulation) { def draw n; clear :white; text "hit escape to quit", 100, 100, :black; end; }.new(500, 250, "Working!").run'
