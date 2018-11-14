@@ -1,11 +1,6 @@
 #!/bin/sh
-set -e
-set -v
 
-# if [ $(id -u) != 0 ]; then
-#     echo "Please run this as root or with sudo"
-#     exit 1
-# fi
+set -v
 
 for gem in graphics rsdl; do
   gem uninstall -ax $gem || true
@@ -15,11 +10,6 @@ case `uname` in
     Darwin)
 	echo "I'm on OSX. Not using sudo"
 	SUDO=
-
-	brew unlink sdl
-	brew unlink sdl_mixer
-	brew unlink sdl_ttf
-	brew unlink sdl_image
 
 	brew install sdl2
 	brew install sdl2_mixer
@@ -31,8 +21,7 @@ case `uname` in
 	echo "I'm on linux, using sudo where needed"
 	SUDO=sudo
 
-	$SUDO apt-get install --no-install-recommends --no-install-suggests libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev
-	$SUDO apt-get install --no-install-recommends --no-install-suggests gcc g++
+	$SUDO apt-get install --no-install-recommends --no-install-suggests libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev gcc g++
 	;;
     *)
 	echo "Unknown OS $OSTYPE, aborting"
