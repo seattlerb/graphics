@@ -2,10 +2,6 @@
 
 set -v
 
-for gem in graphics rsdl; do
-  gem uninstall -ax $gem || true
-done
-
 case `uname` in
     Darwin)
 	echo "I'm on OSX. Not using sudo"
@@ -29,17 +25,16 @@ case `uname` in
 	;;
 esac
 
-$SUDO gem update --system -N -V
-
-gem install hoe --conservative
-$SUDO rake newb
-rake test
-
 if [ -f $0 ]; then
+    $SUDO gem update --system -N -V
+    $SUDO gem install hoe --conservative
+    $SUDO rake newb
+    rake test
     rake clean package
     $SUDO gem install pkg/graphics*.gem
 else
     $SUDO gem install graphics
 fi
 
+echo "running a test... you should see a window show up."
 ruby -Ilib -rgraphics -e 'Class.new(Graphics::Simulation) { def draw n; clear :white; text "hit escape to quit", 100, 100, :black; end; }.new(500, 250, "Working!").run'
