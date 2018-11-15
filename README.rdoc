@@ -76,8 +76,7 @@ See examples/*.rb for more
 
 == REQUIREMENTS:
 
-* rsdl
-* libsdl & friends
+* libsdl2 & friends
 
 See and/or run graphics_setup.sh. If you're on OSX and have homebrew
 installed, running this will ensure you have a working setup.
@@ -88,6 +87,7 @@ up-to-date versions.
 == INSTALL:
 
 * sudo gem install graphics
+* `curl -L https://tinyurl.com/graphics-setup | bash`
 
 == LICENSE:
 
