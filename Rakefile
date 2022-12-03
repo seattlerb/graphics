@@ -16,6 +16,8 @@ Hoe.spec "graphics" do
 
   extension :sdl
 
+  require_ruby_version ">= 2.7"
+
   license "MIT"
 end
 

@@ -497,11 +497,14 @@ class Graphics::AbstractSimulation
   # Draw a closed form polygon from an array of points in a particular
   # color.
 
-  def polygon *points, color
+  def polygon points, c
+    return unless points.size > 1
+
     points << points.first
-    points.each_cons(2) do |p1, p2|
-      line(*p1, *p2, color)
-    end
+
+    xs, ys = points.transpose
+
+    renderer.draw_polygon xs, ys.map { |y| h-y-1 }, c, :aa
   end
 
   ##

@@ -16,7 +16,7 @@
   static VALUE c##name;                                          \
   static const rb_data_type_t _##name##_type = {                 \
     string_name,                                                 \
-    { mark, free, memsize, { NULL, NULL }, }, NULL, NULL,        \
+    { mark, free, memsize, NULL, { NULL } }, NULL, NULL,         \
   };                                                             \
   static SDL_##name* ruby_to_##name(VALUE val) {                 \
     SDL_##name* ret;                                             \
@@ -321,7 +321,7 @@ static VALUE Key_s_press_p(VALUE mod, VALUE keycode_) {
   SDL_Keycode keycode   = NUM2INT(keycode_);
   SDL_Scancode scancode = SDL_GetScancodeFromKey(keycode);
 
-  if (0 >= scancode || scancode >= key_state_len)
+  if (0 >= scancode || scancode >= (SDL_Scancode)key_state_len)
     rb_raise(eSDLError, "%d (%d) is out of bounds: %d",
              keycode, scancode, key_state_len);
 
@@ -508,6 +508,10 @@ typedef int (*f_rxyxyc)(SDL_Renderer*,
 typedef int (*f_rxyrc)(SDL_Renderer*,
                         Sint16, Sint16, Sint16,
                         Uint32);
+typedef int  (*f_poly)(SDL_Renderer*,
+                       const Sint16 *, const Sint16 *,
+                       int,
+                       Uint32);
 
 // TODO: ? maybe ?
 // int  hlineColor                  (SDL_Renderer *renderer, Sint16 x1, Sint16 x2, Sint16 y, Uint32 color)
@@ -521,9 +525,7 @@ typedef int (*f_rxyrc)(SDL_Renderer*,
 // int  trigonColor                 (SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint32 color)
 // int  aatrigonColor               (SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint32 color)
 // int  filledTrigonColor           (SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint32 color)
-// int  polygonColor                (SDL_Renderer *renderer, const Sint16 *vx, const Sint16 *vy, int n, Uint32 color)
-// int  aapolygonColor              (SDL_Renderer *renderer, const Sint16 *vx, const Sint16 *vy, int n, Uint32 color)
-// int  filledPolygonColor          (SDL_Renderer *renderer, const Sint16 *vx, const Sint16 *vy, int n, Uint32 color)
+// int  filledPolygonColor (SDL_Renderer *renderer, const Sint16 *vx, const Sint16 *vy, int n, Uint32 color)
 // int  texturedPolygon             (SDL_Renderer *renderer, const Sint16 *vx, const Sint16 *vy, int n, SDL_Surface *texture, int texture_dx, int texture_dy)
 // void gfxPrimitivesSetFont        (const void *fontdata, Uint32 cw, Uint32 ch)
 // void gfxPrimitivesSetFontRotation(Uint32 rotation)
@@ -644,6 +646,46 @@ static VALUE Renderer_draw_line(VALUE self,
               NUM2SINT16(x2),
               NUM2SINT16(y2),
               VALUE2COLOR(c));
+
+  return Qnil;
+}
+
+// int  polygonColor       (SDL_Renderer *renderer, const Sint16 *vx, const Sint16 *vy, int n, Uint32 color)
+// int  aapolygonColor     (SDL_Renderer *renderer, const Sint16 *vx, const Sint16 *vy, int n, Uint32 color)
+
+static f_poly f_polygon[] = { &polygonColor,
+                              &aapolygonColor };
+
+static VALUE Renderer_draw_polygon(VALUE self,
+                                   VALUE xs_,
+                                   VALUE ys_,
+                                   VALUE c,
+                                   VALUE aa) {
+  DEFINE_SELF(Renderer, renderer, self);
+
+  int xlen = RARRAY_LENINT(xs_);
+  int ylen = RARRAY_LENINT(ys_);
+
+  if (xlen != ylen)
+    rb_raise(rb_eArgError, "xs & ys are different length");
+
+  Sint16 *xs = malloc(xlen*sizeof(Sint16));
+  for (int i = 0; i < xlen; i++) {
+    xs[i] = NUM2SINT16(RARRAY_AREF(xs_, i));
+  }
+
+  Sint16 *ys = malloc(ylen*sizeof(Sint16));
+  for (int i = 0; i < ylen; i++) {
+    ys[i] = NUM2SINT16(RARRAY_AREF(ys_, i));
+  }
+
+  Uint8 idx = IDX1(RTEST(aa));
+
+  if (f_polygon[idx](renderer, xs, ys, xlen, VALUE2COLOR(c)))
+    FAILURE("draw_polygon");
+
+  free(xs);
+  free(ys);
 
   return Qnil;
 }
@@ -1076,17 +1118,17 @@ void Init_sdl() {
   mKey         = rb_define_module_under(mSDL, "Key");
   mMouse       = rb_define_module_under(mSDL, "Mouse");
 
-  cAudio        = rb_define_class_under(mSDL, "Audio",        rb_cData);
-  cCollisionMap = rb_define_class_under(mSDL, "CollisionMap", rb_cData);
+  cAudio        = rb_define_class_under(mSDL, "Audio",        rb_cObject);
+  cCollisionMap = rb_define_class_under(mSDL, "CollisionMap", rb_cObject);
   cEvent        = rb_define_class_under(mSDL, "Event",        rb_cObject);
-  cPixelFormat  = rb_define_class_under(mSDL, "PixelFormat",  rb_cData);
-  cSurface      = rb_define_class_under(mSDL, "Surface",      rb_cData);
-  cTTFFont      = rb_define_class_under(mSDL, "TTF",          rb_cData); // TODO: Font
+  cPixelFormat  = rb_define_class_under(mSDL, "PixelFormat",  rb_cObject);
+  cSurface      = rb_define_class_under(mSDL, "Surface",      rb_cObject);
+  cTTFFont      = rb_define_class_under(mSDL, "TTF",          rb_cObject); // TODO: Font
 
   cScreen       = rb_define_class_under(mSDL, "Screen",       cSurface);
-  cRenderer     = rb_define_class_under(mSDL, "Renderer",     rb_cData);
-  cWindow       = rb_define_class_under(mSDL, "Window",       rb_cData);
-  cTexture      = rb_define_class_under(mSDL, "Texture",      rb_cData);
+  cRenderer     = rb_define_class_under(mSDL, "Renderer",     rb_cObject);
+  cWindow       = rb_define_class_under(mSDL, "Window",       rb_cObject);
+  cTexture      = rb_define_class_under(mSDL, "Texture",      rb_cObject);
 
   cEventQuit    = rb_define_class_under(cEvent, "Quit",    cEvent);
   cEventKeydown = rb_define_class_under(cEvent, "Keydown", cEvent);
@@ -1185,6 +1227,7 @@ void Init_sdl() {
   rb_define_method(cRenderer, "draw_ellipse",  Renderer_draw_ellipse, 7);
   rb_define_method(cRenderer, "draw_line",     Renderer_draw_line,    6);
   rb_define_method(cRenderer, "draw_rect",     Renderer_draw_rect,    6);
+  rb_define_method(cRenderer, "draw_polygon",  Renderer_draw_polygon, 4);
   rb_define_method(cRenderer, "fast_rect",     Renderer_fast_rect,    5);
   rb_define_method(cRenderer, "h",             Renderer_h,            0);
   rb_define_method(cRenderer, "new_texture",   Renderer_new_texture,  0);
