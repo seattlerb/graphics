@@ -8,7 +8,7 @@
 #include <sge/sge_collision.h>
 #include <SDL_mixer.h>
 
-// https://github.com/google/protobuf/blob/master/ruby/ext/google/protobuf_c/defs.c
+// https://github.com/ruby/ruby/blob/master/doc/extension.rdoc#c-struct-to-ruby-object-
 
 #define DEFINE_CLASS_(name, string_name, mark, free, memsize)    \
   static void mark(void*);                                       \
@@ -16,7 +16,15 @@
   static VALUE c##name;                                          \
   static const rb_data_type_t _##name##_type = {                 \
     string_name,                                                 \
-    { mark, free, memsize, NULL, { NULL } }, NULL, NULL,         \
+    { mark,                                                      \
+      free,                                                      \
+      memsize,                                                   \
+        NULL,     /* compact */                                  \
+      { NULL }                                                   \
+    },                                                           \
+    NULL,         /* parent */                                   \
+    NULL,         /* data */                                     \
+    0,            /* flags */                                    \
   };                                                             \
   static SDL_##name* ruby_to_##name(VALUE val) {                 \
     SDL_##name* ret;                                             \
@@ -30,7 +38,8 @@
                   _##name##_mark, _##name##_free, _##name##_memsize)
 
 #define DEFINE_CLASS_0(name, string_name)                        \
-  DEFINE_CLASS_(name, string_name, _##name##_mark, _##name##_free, NULL)
+  DEFINE_CLASS_(name, string_name,                               \
+                  _##name##_mark, _##name##_free, NULL)
 
 #define DEFINE_SELF(type, var, rb_var)                           \
   SDL_##type* var = ruby_to_##type(rb_var)
@@ -1139,6 +1148,17 @@ void Init_sdl() {
   cEventMouseup   = rb_define_class_under(cEvent, "Mouseup",   cEvent);
 
   eSDLError    = rb_define_class_under(mSDL,     "Error",           rb_eStandardError);
+
+  //// T_DATA cleanup: (mirror DEFINE_CLASS* calls above)
+
+  rb_undef_alloc_func(cAudio);
+  rb_undef_alloc_func(cSurface);
+  rb_undef_alloc_func(cCollisionMap);
+  rb_undef_alloc_func(cPixelFormat);
+  rb_undef_alloc_func(cTTFFont);
+  rb_undef_alloc_func(cRenderer);
+  rb_undef_alloc_func(cWindow);
+  rb_undef_alloc_func(cTexture);
 
   //// SDL methods:
 
