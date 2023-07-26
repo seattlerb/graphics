@@ -2,7 +2,7 @@
 # The top-level namespace.
 
 class Graphics
-  VERSION = "1.0.1" # :nodoc:
+  VERSION = "1.1.0" # :nodoc:
 end
 
 require "graphics/simulation"

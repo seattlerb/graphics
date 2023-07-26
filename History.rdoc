@@ -1,3 +1,18 @@
+=== 1.1.0 / 2023-07-26
+
+* 3 minor enhancements:
+
+  * Added anti-aliasing to polygon. Want to add filling at some point.
+  * Requiring ruby 2.7+. Too many changes to ruby internals to try to maintain.
+  * polygon now takes an array of points.
+
+* 4 bug fixes:
+
+  * Fixed a bunch of compiler warnings for ruby struct changes.
+  * Fixed font lookup on linux. (presidentbeef)
+  * Fixed graphics_setup.sh for obsolete build flag on sdl2_image. (NickSchimek)
+  * ruby 3.2: Fixed warning from ruby headers by explicitly removing alloc funcs.
+
 === 1.0.1 / 2018-11-14
 
 * 2 bug fixes:
