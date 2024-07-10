@@ -86,8 +86,8 @@ up-to-date versions.
 
 == INSTALL:
 
-* sudo gem install graphics
-* `curl -L https://tinyurl.com/graphics-setup | bash`
+    curl -L https://tinyurl.com/graphics-setup | bash
+    sudo gem install graphics
 
 == LICENSE:
 
