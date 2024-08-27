@@ -1,3 +1,15 @@
+=== 1.1.1 / 2024-08-27
+
+* 1 minor enhancement:
+
+  * Add basic package manager detection to deps script. (havenwood)
+
+* 3 bug fixes:
+
+  * Fixed home link in readme/gemspec.
+  * Minor fix in ext/sdl/sge/sge_surface.cpp.
+  * Reorder installation instructions & format as code. (havenwood)
+
 === 1.1.0 / 2023-07-26
 
 * 3 minor enhancements:
