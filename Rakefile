@@ -21,6 +21,10 @@ Hoe.spec "graphics" do
   license "MIT"
 end
 
+task :compile do
+  chmod_R "u+w", "tmp" # loosen up user perms
+end
+
 task :demos => :compile do
   Dir["examples/*.rb"].sort.each do |script|
     puts script
