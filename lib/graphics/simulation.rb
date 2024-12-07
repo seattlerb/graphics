@@ -117,12 +117,9 @@ class Graphics::AbstractSimulation
   #
   # This also names a bunch colors and hues for convenience.
 
-  def initialize w=nil, h=nil, name=self.class.name, full=false
+  def initialize w = nil, h = nil, name = self.class.name, full = false
     w ||= SDL::Screen::W/2
     h ||= SDL::Screen::H/2
-
-    # TODO: remove for 1.0.0 final
-    raise "Do NOT pass bpp to Simulation anymore" if !name || Integer === name
 
     full = full ? SDL::FULLSCREEN : 0
 
@@ -504,7 +501,7 @@ class Graphics::AbstractSimulation
 
     xs, ys = points.transpose
 
-    renderer.draw_polygon xs, ys.map { |y| h-y-1 }, c, :aa
+    renderer.draw_polygon xs, ys.map { |y| h-y-1 }, color[c], :aa
   end
 
   ##

@@ -12,7 +12,7 @@ class Editor < Graphics::Simulation
     super 850, 850
 
     self.overlay = true
-    self.s = ""
+    self.s = +""
     self.lines = []
   end
 
